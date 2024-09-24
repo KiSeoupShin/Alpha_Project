@@ -5,7 +5,7 @@ import re
 import json
 import random
 import logging
-from speechbrain.dataio.dataio import read_audio
+# from speechbrain.dataio.dataio import read_audio
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ def prepare_data(
     save_json_test,
     label_map,
     feat_dir,
-    split_ratio=[80, 20],
+    split_ratio=[0.8, 0.2],
     seed=12,
 ):
     # setting seeds for reproducible code.

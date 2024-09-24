@@ -6,9 +6,9 @@ import soundfile as sf
 import numpy as np
 import logging
 import torchaudio
+import random
 SAMPLING_RATE=16000
 logger = logging.getLogger(__name__)
-
 
 
 """
@@ -42,7 +42,7 @@ def replace_label(data, label_map, logger):
         label = label_map[emotion]
         instance['emo'] = label
         new_data.append(instance)
-    return new_data    
+    return new_data
 
 def prepare_data_from_jsonl(
     dataset,
@@ -50,7 +50,7 @@ def prepare_data_from_jsonl(
     meta_data_dir,
     label_map,
     fold=1,
-    split_ratio=[80, 20],
+    split_ratio=[0.8, 0.2],
     seed=12,
 ):
     # setting seeds for reproducible code.
@@ -75,6 +75,7 @@ def prepare_data_from_jsonl(
     # load in train & test data
     train_data = []
     test_data = []
+    valid_data = []
     with open(train_data_path) as f:
         for line in f:
             train_data.append(json.loads(line.strip()))
@@ -87,7 +88,6 @@ def prepare_data_from_jsonl(
                 valid_data.append(json.loads(line.strip()))
             
             
-
     train_data = check_exists(train_data, data_dir, logger)
     test_data = check_exists(test_data, data_dir, logger)
     if official_valid:
@@ -120,7 +120,7 @@ def split_sets(train_data, split_ratio):
     train_nodev_data = [ train_data[idx] for idx in sample_idx[:num_train_nodev_samples]]
     valid_data = [train_data[idx] for idx in sample_idx[num_train_nodev_samples:]]
     
-    return train_data, valid_data
+    return train_nodev_data, valid_data
 
 def read_wav(data):
     wav_path = data['wav']
@@ -145,10 +145,11 @@ def read_wav(data):
     return wav 
 
 class EmoDataset(Dataset):
-    def __init__(self, dataset, data_dir, meta_data_dir, fold=1, split="train"):
+    def __init__(self, dataset, data_dir, meta_data_dir, label_map, fold=1, split="train"):
         super().__init__()
         self.data_dir = data_dir
-        train_data, valid_data, test_data = prepare_data_from_jsonl(dataset, data_dir, meta_data_dir, fold = fold)
+
+        train_data, valid_data, test_data = prepare_data_from_jsonl(dataset, os.path.join(data_dir, 'data'), meta_data_dir, label_map=label_map, fold=fold)
         if split == 'train':
             self.data_list = train_data
         elif split == 'valid':
@@ -177,4 +178,14 @@ class EmoDataset(Dataset):
             # other meta data can be added here
         }
 
+    def save_dataset_to_json(self, save_path):
+        import json
         
+        dataset_dict = {
+            "data": self.data_list
+        }
+        
+        with open(save_path, 'w') as json_file:
+            json.dump(dataset_dict, json_file, indent=2)
+            
+        logger.info(f'Dataset saved to {save_path}')
