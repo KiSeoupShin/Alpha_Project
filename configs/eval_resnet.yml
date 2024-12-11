@@ -1,0 +1,20 @@
+test:
+  dataset_type: "single"
+  process_type: "test"
+  data_dir: "./"
+  json_dir: "./json_file"
+  mel_dir: "./mel_file"
+  batch_size: 16
+  shuffle: false
+  dataset_file: "mead"
+
+model:
+  num_classes: 8
+  dropout_rate: 0.5
+  linear_layer_size: 640
+  filter_sizes: [64, 48, 32, 32]
+
+device: "cuda"
+save_dir: "output/laughter_detection/logs_2/eval"
+model_type: "resnet"
+checkpoint_path: "output/laughter_detection/logs_2/ckpt/best_model.pth"

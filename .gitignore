@@ -2,3 +2,11 @@
 data/
 downloads/
 *.ipynb
+*.pyc
+*.npy
+ETViT_output/
+embedding/
+before_code/
+clip/
+output/
+laughter-detection/

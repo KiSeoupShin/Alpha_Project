@@ -1,5 +1,5 @@
 import os
-from EmoBox.EmoDataset import EmoDataset
+from EmoBox.EmoDataset import EmoDataset_Downloader
 from tqdm import tqdm
 
 def main():
@@ -25,9 +25,9 @@ def main():
         fold = '1'
 
         # 데이터셋 생성
-        train_dataset = EmoDataset(dataset=dataset, data_dir=base_dir, meta_data_dir=meta_data_dir, label_map=label_map_path, fold=fold, split="train")
-        valid_dataset = EmoDataset(dataset=dataset, data_dir=base_dir, meta_data_dir=meta_data_dir, label_map=label_map_path, fold=fold, split="valid")
-        test_dataset = EmoDataset(dataset=dataset, data_dir=base_dir, meta_data_dir=meta_data_dir, label_map=label_map_path, fold=fold, split="test")
+        train_dataset = EmoDataset_Downloader(dataset=dataset, data_dir=base_dir, meta_data_dir=meta_data_dir, label_map=label_map_path, fold=fold, split="train")
+        valid_dataset = EmoDataset_Downloader(dataset=dataset, data_dir=base_dir, meta_data_dir=meta_data_dir, label_map=label_map_path, fold=fold, split="valid")
+        test_dataset = EmoDataset_Downloader(dataset=dataset, data_dir=base_dir, meta_data_dir=meta_data_dir, label_map=label_map_path, fold=fold, split="test")
 
         save_base_dir = os.path.join(base_dir, 'json_file', dataset)
 
