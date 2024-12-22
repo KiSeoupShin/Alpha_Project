@@ -20,7 +20,7 @@
 ## 3. Model FLow
 
 - Model Architecture
-- ConvNext 모델과 mel-spectrogram을 통해 감정을 분류
+- ConvNeXt 모델과 mel-spectrogram을 통해 감정을 분류
 - Positional Encoding 을 추가하여 시간적 정보를 파악할 수 있는지도 실험
 
 
@@ -29,8 +29,8 @@
 | Method                     | WA      | UA      | F1      |
 |----------------------------|---------|---------|---------|
 | ResNet                     | 0.5206  | 0.4940  | 0.4892  |
-| ConvNext(Ours)             | **0.7310**  | **0.7279**  | **0.7279**  |
-| ConvNext + PE(Ours)        | 0.5933  | 0.5794  | 0.5838  |
+| ConvNeXt(Ours)             | **0.7310**  | **0.7279**  | **0.7279**  |
+| ConvNeXt + PE(Ours)        | 0.5933  | 0.5794  | 0.5838  |
 
 PE : Positional Encoding         
 WA : Weighted Accuracy, UA : Unweighted Accuracy, F1 : Macro F1 Score
