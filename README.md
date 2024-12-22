@@ -32,7 +32,7 @@
 | ConvNext(Ours)             | **0.7310**  | **0.7279**  | **0.7279**  |
 | ConvNext + PE(Ours)        | 0.5933  | 0.5794  | 0.5838  |
 
-PE : Positional Encoding
+PE : Positional Encoding         
 WA : Weighted Accuracy, UA : Unweighted Accuracy, F1 : Macro F1 Score
 
 <br/>
