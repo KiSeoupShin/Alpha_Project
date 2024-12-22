@@ -10,14 +10,14 @@ valid_dataloader = load_dataloader(**config['test'])
 device = torch.device(config['device'])
 
 # 모델 생성 및 GPU로 이동
-# if config['model_type'] == 'resnet':
-#     model = ResNetBigger(**config['model'])
-# elif config['model_type'] == 'convnext':
-#     if config['model_size'] == 'tiny':
-#         model = convnext_tiny(**config['model'])
-#     elif config['model_size'] == 'small':
-#         model = convnext_small(**config['model'])
-model = MelClassifier(config['backbone'], config['attention'])
+if config['model_type'] == 'resnet':
+    model = ResNetBigger(**config['model'])
+elif config['model_type'] == 'convnext':
+    if config['model_size'] == 'tiny':
+        model = convnext_tiny(**config['backbone'])
+    elif config['model_size'] == 'small':
+        model = convnext_small(**config['backbone'])
+# model = MelClassifier(config['backbone'], config['attention'])
 model.to(device)
 
 checkpoint = torch.load(config['checkpoint_path'])
@@ -39,7 +39,7 @@ for batch in tqdm(valid_dataloader):
         inputs = torch.nn.functional.interpolate(inputs, size=(128, 160), mode='bilinear', align_corners=False)
     
     with torch.no_grad():
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
     
     _, predicted = outputs.max(1)
     all_predicted.extend(predicted.cpu().numpy())

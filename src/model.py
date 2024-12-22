@@ -183,8 +183,8 @@ class ConvNeXt(nn.Module):
     def __init__(self, in_chans=3, num_classes=1000, 
                  depths=[3, 3, 9, 3], dims=[96, 192, 384, 768], drop_path_rate=0., 
                  layer_scale_init_value=1e-6, head_init_scale=1.,
-                 is_pos_encoding=True, height=128, width=160,
-                 is_backbone=True,
+                 is_pos_encoding=False, height=128, width=160,
+                 is_backbone=False,
                  ):
         super().__init__()
 
@@ -249,7 +249,7 @@ class ConvNeXt(nn.Module):
             x = torch.stack(outputs, dim=-2)
             out = self.head(x)
             out = out.max(dim=-2).values
-            return x, out
+            return out, x
         else:
             x = self.forward_features(x)
             x = self.head(x)
@@ -325,9 +325,9 @@ class MelClassifier(nn.Module):
         self.attention = Attention(**attention_parameters)
 
     def forward(self, x):
-        x, out = self.backbone(x)
+        out, x = self.backbone(x)
         x = self.attention(x)
-        return x, out
+        return out, x
 
 
 def convnext_tiny(**kwargs):

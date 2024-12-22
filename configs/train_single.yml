@@ -1,22 +1,22 @@
 train:
-  process_type: "train"
   dataset_type: "single"
+  process_type: "train"
   data_dir: "./"
   json_dir: "./json_file"
   mel_dir: "./mel_file"
   batch_size: 64
   shuffle: true
-  dataset_file: "mead"
+  dataset_file: "iemocap"
 
 valid:
-  process_type: "valid"
   dataset_type: "single"
+  process_type: "valid"
   data_dir: "./"
   json_dir: "./json_file"
   mel_dir: "./mel_file"
   batch_size: 64
   shuffle: false
-  dataset_file: "mead"
+  dataset_file: "iemocap"
 
 model:
   num_classes: 4
@@ -25,7 +25,7 @@ model:
   filter_sizes: [64, 48, 32, 32]
 
 mel:
-  dataset_file: "mead"
+  dataset_file: "iemocap"
   data_dir: "./data"
   save_dir: "./mel_file"
   sr: 16000
@@ -33,8 +33,9 @@ mel:
 
 device: "cuda"
 log_dir: "output/laughter_detection"
-model_type: "resnet"
 is_continue: false
-checkpoint_path: "output/laughter_detection/logs_1/ckpt/best_model.pth"
-start_epoch: 101
-num_epochs: 200
+model_type: resnet
+model_size: "small"  # tiny, small, base, large, xlarge
+checkpoint_path: "output/convnext/logs_6/ckpt/best_model.pth"
+num_epochs: 100
+initial_lr: 0.001

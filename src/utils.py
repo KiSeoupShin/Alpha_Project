@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from torch.optim.lr_scheduler import ReduceLROnPlateau, OneCycleLR
 import torch.optim as optim
+import torch.nn as nn
 
 def load_config(config_path):
     with open(config_path, 'r') as file:
@@ -32,15 +33,18 @@ def compute_metrics(config, model, optimizer, dataloader, attn_loss, backbone_lo
 
         inputs = inputs.unsqueeze(1)
 
-        if config['model_type'] == 'convnext':
+        if config['model_type'] in ['convnext', 'attention']:
             inputs = torch.nn.functional.interpolate(inputs, size=(128, 160), mode='bilinear', align_corners=False)
         
         if type == 'train':
             optimizer.zero_grad()
         
-        attn_outputs, backbone_outputs = model(inputs)
-        curr_attn_loss = attn_loss(attn_outputs, labels, model.parameters())
-        curr_backbone_loss = backbone_loss(backbone_outputs, labels, model.parameters())
+        backbone_outputs, attn_outputs = model(inputs)
+        if config['model_type'] == 'attention':
+            curr_attn_loss = attn_loss(attn_outputs, labels, model.parameters())
+        elif config['model_type'] == 'convnext':
+            curr_attn_loss = 0
+        curr_backbone_loss = backbone_loss(backbone_outputs, labels)
         loss = curr_attn_loss + curr_backbone_loss
 
         if type == 'train':
@@ -51,16 +55,24 @@ def compute_metrics(config, model, optimizer, dataloader, attn_loss, backbone_lo
                 scheduler.step(loss)
         
         total_loss += loss.item()
-        total_attn_loss += curr_attn_loss.item()
+        if config['model_type'] == 'attention':
+            total_attn_loss += curr_attn_loss.item()
         total_backbone_loss += curr_backbone_loss.item()
-        _, predicted = attn_outputs.max(1)
+
+        if config['model_type'] == 'attention':
+            _, predicted = attn_outputs.max(1)
+        else:
+            _, predicted = backbone_outputs.max(1)
         
         # 예측값과 실제값을 리스트에 저장
         predictions.extend(predicted.cpu().numpy())
         true_labels.extend(labels.cpu().numpy())
         
     avg_loss = total_loss / len(dataloader)
-    avg_attn_loss = total_attn_loss / len(dataloader)
+    if config['model_type'] == 'attention':
+        avg_attn_loss = total_attn_loss / len(dataloader)
+    else:
+        avg_attn_loss = 0
     avg_backbone_loss = total_backbone_loss / len(dataloader)
     
     # 전체 정확도 계산
@@ -88,11 +100,14 @@ def compute_metrics(config, model, optimizer, dataloader, attn_loss, backbone_lo
     
     return metrics
 
-def get_optim_and_criterion(model, initial_lr=1e-3, num_epochs=100, train_loader=None):
+def get_optim_and_criterion(model, model_type, initial_lr=1e-3, num_epochs=100, train_loader=None):
     from loss import FocalLoss
     
-    attn_loss = FocalLoss()
-    backbone_loss = FocalLoss()
+    if model_type == 'attention':
+        attn_loss = FocalLoss()
+    elif model_type == 'convnext':
+        attn_loss = None
+    backbone_loss = nn.CrossEntropyLoss()
 
     optimizer = optim.AdamW(
         model.parameters(),
@@ -110,16 +125,16 @@ def get_optim_and_criterion(model, initial_lr=1e-3, num_epochs=100, train_loader
     #                               threshold=1e-4,
     #                               cooldown=5
     #                               )    # 학습률 수렴 속도가 너무 빠름
-    scheduler = OneCycleLR(
-        optimizer,
-        max_lr=initial_lr,
-        steps_per_epoch=len(train_loader),
-        epochs=num_epochs,
-        pct_start=0.3,
-        div_factor=25,
-        final_div_factor=1e-4
-    )
-    return attn_loss, backbone_loss, optimizer, scheduler
+    # scheduler = OneCycleLR(
+    #     optimizer,
+    #     max_lr=initial_lr,
+    #     steps_per_epoch=len(train_loader),
+    #     epochs=num_epochs,
+    #     pct_start=0.3,
+    #     div_factor=25,
+    #     final_div_factor=1e-4
+    # )
+    return attn_loss, backbone_loss, optimizer, None
 
 def create_writer(config):
     log_dir = config['log_dir']

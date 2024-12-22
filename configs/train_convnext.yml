@@ -6,7 +6,7 @@ train:
   mel_dir: "./mel_file"
   batch_size: 64
   shuffle: true
-  dataset_file: "iemocap"
+  dataset_file: "mead"
 
 valid:
   dataset_type: "single"
@@ -16,29 +16,20 @@ valid:
   mel_dir: "./mel_file"
   batch_size: 64
   shuffle: false
-  dataset_file: "iemocap"
+  dataset_file: "mead"
 
 backbone:
   in_chans: 1
-  num_classes: 4
+  num_classes: 8
   drop_path_rate: 0.
   head_init_scale: 1.
   height: 128
   width: 160
-  is_pos_encoding: false
-  is_backbone: true
-
-attention:
-  dim: 768
-  num_classes: 4
-  num_heads: 8
-  qkv_bias: false
-  qk_scale: null
-  attn_drop: 0.
-  proj_drop: 0.
+  is_pos_encoding: true
+  is_backbone: false
 
 mel:
-  dataset_file: "iemocap"
+  dataset_file: "mead"
   data_dir: "./data"
   save_dir: "./mel_file"
   sr: 16000
@@ -48,7 +39,7 @@ device: "cuda"
 log_dir: "output/convnext"
 is_continue: false
 model_type: convnext
-model_size: "small"  # tiny, small, base, large, xlarge
+model_size: "tiny"  # tiny, small, base, large, xlarge
 checkpoint_path: "output/convnext/logs_6/ckpt/best_model.pth"
 num_epochs: 100
 initial_lr: 0.001

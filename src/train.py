@@ -17,14 +17,15 @@ valid_dataloader = load_dataloader(**config['valid'])
 device = torch.device(config['device'])
 
 # 모델 생성 및 GPU로 이동
-# if config['model_type'] == 'resnet':
-#     model = ResNetBigger(**config['model'])
-# elif config['model_type'] == 'convnext':
-#     if config['model_size'] == 'tiny':
-#         model = convnext_tiny(**config['model'])
-#     elif config['model_size'] == 'small':
-#         model = convnext_small(**config['model'])
-model = MelClassifier(config['backbone'], config['attention'])
+if config['model_type'] == 'resnet':
+    model = ResNetBigger(**config['backbone'])
+elif config['model_type'] == 'convnext':
+    if config['model_size'] == 'tiny':
+        model = convnext_tiny(**config['backbone'])
+    elif config['model_size'] == 'small':
+        model = convnext_small(**config['backbone'])
+elif config['model_type'] == 'attention':
+    model = MelClassifier(config['backbone'], config['attention'])
 model.to(device)
 
 # checkpoint가 존재하면 불러오기
@@ -39,7 +40,8 @@ else:
     start_epoch = 0
 
 # Loss function과 optimizer 정의
-attn_loss, backbone_loss, optimizer, scheduler = get_optim_and_criterion(model, 
+attn_loss, backbone_loss, optimizer, scheduler = get_optim_and_criterion(model,
+                                                                         config['model_type'],
                                                                          initial_lr=config['initial_lr'], 
                                                                          num_epochs=config['num_epochs'], 
                                                                          train_loader=train_dataloader
@@ -114,7 +116,7 @@ for epoch in range(start_epoch, start_epoch + num_epochs):
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'scheduler_state_dict': scheduler.state_dict(),
+            # 'scheduler_state_dict': scheduler.state_dict(),
         }
         torch.save(checkpoint, f'{log_dir}/ckpt/best_model.pth')
 
